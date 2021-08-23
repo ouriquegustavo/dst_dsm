@@ -128,3 +128,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+steamcmd_linux
+steamcmd
+steamcmd_nt
+dedicated_server
+worlds
