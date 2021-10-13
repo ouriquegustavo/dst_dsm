@@ -1,31 +1,32 @@
 from PyQt5.QtGui import * 
 from PyQt5.QtWidgets import * 
-from main.gui_main import GUIMain
-from main.gui_nocmd import GUINoCMD
-from main.steamcmd import SteamCMD
-from main.window import Window
-from main.popup_steamcmd import PopupSteamCMD
-from main.popup_error import PopupError
+from main.lib.validator import Validator
+from main.window.main_window import MainWindow
+from main.window.popup_steamcmd import PopupSteamCMD
+from main.window.popup_dstds import PopupDSTDS
+from main.window.popup_error import PopupError
 import os
 import sys
 
 class DSTDSM():
     def __init__(self):
         self.platform=sys.platform
-        self.path_steamcmd="steamcmd_{}".format(self.platform)
+        self.arch=sys.maxsize > 0x100000000
+        self.path_steamcmd="steamcmd"
         self.path_worlds="worlds"
         self.path_dstds="dedicated_server"
-        self.windows={}
         self.app=QApplication([])
         self.style='Fusion'
         self.app.setStyle(QStyleFactory.create(self.style))
         
-        self.steamcmd=SteamCMD(self)
+        self.validator=Validator(self)
         
         self.load_window()
         self.disable_window()
-        if not self.steamcmd.check_for_steamcmd():
+        if not self.validator.check_for_steamcmd():
             self.load_popup_steamcmd()
+        elif not self.validator.check_for_dstds():
+            self.load_popup_dstds()
         else:
             self.enable_window()
         
@@ -34,13 +35,16 @@ class DSTDSM():
             self.window.children()[i].deleteLater()
             
     def load_window(self):
-        self.window=Window(self)
-        self.windows['window']=self.window
+        self.window=MainWindow(self)
         self.window.show()
         
     def load_popup_steamcmd(self):
         self.popup_steamcmd=PopupSteamCMD(self)
         self.popup_steamcmd.show()
+        
+    def load_popup_dstds(self):
+        self.popup_dstds=PopupDSTDS(self)
+        self.popup_dstds.show()
         
     def load_popup_error(self, message):
         self.popup_error=PopupError(self,message)
